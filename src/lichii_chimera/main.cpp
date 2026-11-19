@@ -60,6 +60,7 @@
 #include "core/frontend/framebuffer_layout.h"
 #include "core/hle/service/am/applet_manager.h"
 #include "core/hle/service/filesystem/filesystem.h"
+#include "hid_core/hid_core.h"
 #include "core/loader/loader.h"
 #include "input_common/drivers/virtual_gamepad.h"
 #include "input_common/main.h"
@@ -434,6 +435,11 @@ int main(int argc, char** argv) {
     system.Initialize();
     system.ApplySettings();
 
+    // Registers the input engines, the virtual gamepad among them (lichii-cmd's SDL window does
+    // this; there is no window here).
+    input_subsystem.Initialize();
+    system.HIDCore().ReloadInputDevices();
+
     HeadlessWindow window{out_width, out_height};
     system.SetContentProvider(std::make_unique<FileSys::ContentProviderUnion>());
     system.SetFilesystem(std::make_shared<FileSys::RealVfsFilesystem>());
@@ -517,6 +523,7 @@ int main(int argc, char** argv) {
         void(system.Pause());
         system.ShutdownMainProcess();
     }
+    input_subsystem.Shutdown();
     if (network) {
         Network::Shutdown();
     }

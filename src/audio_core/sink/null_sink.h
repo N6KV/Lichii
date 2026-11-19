@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <functional>
+#include <span>
+
 #include <algorithm>
 #include <chrono>
 #include <string>
@@ -23,6 +26,16 @@ class System;
 } // namespace Core
 
 namespace AudioCore::Sink {
+
+/// Receives the samples the null sink plays (interleaved, `channels` per frame) instead of
+/// discarding them. Used by the Chimera frontend, which hands the audio to its host
+/// application; must be set before the audio system starts.
+using NullSinkCapture = std::function<void(std::span<const s16> samples, u32 channels)>;
+inline NullSinkCapture& GetNullSinkCapture() {
+    static NullSinkCapture capture;
+    return capture;
+}
+
 class NullSinkStreamImpl final : public SinkStream {
 public:
     explicit NullSinkStreamImpl(Core::System& system_, StreamType type_)
@@ -68,6 +81,10 @@ private:
             std::this_thread::sleep_until(next);
             if (!paused) {
                 ProcessAudioOutAndRender(discarded, TargetSampleCount);
+                if (const auto& capture = GetNullSinkCapture();
+                    capture && (type == StreamType::Render || type == StreamType::Out)) {
+                    capture(discarded, GetDeviceChannels());
+                }
             }
             // Make up for late wake-ups, but after a host stall skip all but 20 blocks of it.
             next = (std::max)(next, std::chrono::steady_clock::now() - 20 * period);

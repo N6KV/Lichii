@@ -301,6 +301,8 @@ cmake_dependent_option(LICHII_ROOM_STANDALONE "Enable standalone room executable
 
 cmake_dependent_option(LICHII_CMD "Compile the eden-cli executable" ON "NOT ANDROID" OFF)
 
+cmake_dependent_option(LICHII_CHIMERA "Compile lichii-chimera, the windowless frontend for Chimera" ON "NOT ANDROID" OFF)
+
 cmake_dependent_option(LICHII_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR LINUX" OFF)
 
 option(LICHII_DOWNLOAD_TIME_ZONE_DATA "Always download time zone binaries" ON)

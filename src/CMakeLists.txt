@@ -334,6 +334,10 @@ function(lichii_add_version_info target description file_name)
     target_sources(${target} PRIVATE ${rc})
 endfunction()
 
+if (LICHII_CHIMERA)
+    add_subdirectory(lichii_chimera)
+endif()
+
 if (LICHII_CMD)
     add_subdirectory(lichii_cmd)
     set_target_properties(lichii-cmd PROPERTIES OUTPUT_NAME "eden-cli")
